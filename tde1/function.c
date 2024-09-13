@@ -16,7 +16,7 @@ struct dicio{
 	struct dicio *prox;
 };
 
-int read_archbin(FILE *filme, struct dicio **ini){
+void read_archbin(FILE *filme, struct dicio **ini){
 	int count = 0;
 	char letra = '\0';
 
@@ -27,7 +27,7 @@ int read_archbin(FILE *filme, struct dicio **ini){
         if (read.nome[0] > letra || letra == '\0') {
             struct dicio *novo = (struct dicio *)malloc(sizeof(struct dicio));
             if (novo == NULL) {
-                perror("Erro ao alocar memória");
+                perror("Erro ao alocar memÃ³ria");
                 exit(1);
             }
             novo->key = read.nome[0];
@@ -36,7 +36,7 @@ int read_archbin(FILE *filme, struct dicio **ini){
 
             letra = read.nome[0]; // Atualize a letra depois de adicionar o novo item
 
-            if (*ini == NULL) { // Primeira inserção
+            if (*ini == NULL) { // Primeira inserÃ§Ã£o
                 *ini = novo;
                 aux = novo;
             } else {
@@ -49,8 +49,10 @@ int read_archbin(FILE *filme, struct dicio **ini){
 
 	rewind(filme); //rebobina o arquivo
 	
-	return 0;
+	return;
 }
+
+
 
 void txt2bin(FILE *filme){
 
@@ -89,7 +91,7 @@ void txt2bin(FILE *filme){
             novo->id_direc = atoi(token);
         }
         
-        fwrite(novo, sizeof(struct movie),1,filmebin); // fwrite usado quando o arq é binario, (end struct, tamanho do dado, qntd de elementos, arq. destino)
+        fwrite(novo, sizeof(struct movie),1,filmebin); // fwrite usado quando o arq Ã© binario, (end struct, tamanho do dado, qntd de elementos, arq. destino)
 	}
 	
 	free(novo);
@@ -97,8 +99,54 @@ void txt2bin(FILE *filme){
 	fclose(filmebin);
 }
 
+void search_movie(char key[64], struct dicio *ini, FILE *filme){
+	struct dicio *aux = ini;
+	
+	int inicio, final;
+	struct movie read;
+	
+	while (aux != NULL && key[0] != aux->key) {
+		aux = aux->prox;
+	}
+	if (aux == NULL) {
+		printf("Filme não conta no catálogo");
+		return;		
+	} else {
+		inicio = aux->val;
+		if (aux->prox == NULL) {
+			final = inicio;
+		} else {
+			final = aux->prox->val - 1;
+		}
+		while(inicio <= final){
+			int meio = inicio + (final - inicio) / 2;
+			fseek(filme, sizeof(struct movie) * meio, SEEK_SET);
+			fread(&read, sizeof(struct movie), 1, filme);
+			if (strcmp(key, read.nome) == 0) {
+				printf("\nFilme Encontrado: \n");
+				printf("key: %s \n", key);
+				printf("Id: %d \n", read.id);
+				printf("Nome: %s \n", read.nome);
+				printf("Ano: %d \n", read.age);
+				printf("Link: %s \n", read.link); // Corrigido para %s em vez de %d
+				printf("Id_Diretor: %d \n", read.id_direc);
+				break;
+			} else if (strcmp(key, read.nome) < 0){
+				final = meio - 1;
+			} else{
+				inicio = meio + 1;
+			}
+			if (inicio > final) {
+				printf("\n Filme Não encontrado.");
+				break;
+			}
+		}
+	rewind(filme);
+	}
+}
+
 void print_dicio(struct dicio *ini){
-struct dicio *aux = ini; //neste caso o endereço vai pegar o valor e colocar no endereço
+struct dicio *aux = ini; //neste caso o endereÃ§o vai pegar o valor e colocar no endereÃ§o
 printf("\nLista: \n");
 while(aux != NULL){
 printf("%d %c (%p) \n",aux->val,aux->key, aux);
@@ -114,14 +162,16 @@ int main(){
         perror("Erro ao abrir o arquivo de texto");
         return 1;
     }
+    
+    struct dicio *ini = NULL;
 	
 	//txt2bin(filme);
-
-	struct dicio *ini = NULL;
 	
 	read_archbin(filme, &ini);
 
 	print_dicio(ini);
+	
+	search_movie("Super Mario Bros.", ini, filme);
 	
 	//search_arq(filme);	
 }

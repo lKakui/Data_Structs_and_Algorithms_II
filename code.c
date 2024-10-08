@@ -5,12 +5,12 @@
 typedef struct produto {
     float price;
     char idProd[20];      // Primary Key
-    char brand[30];
+    char brand[30];      // Secondary Key
     char codeCategory[40];
 } PROD;
 
 typedef struct cliente {
-    char eventType[10];
+    char eventType[10];   // Secondary Key
     char idUser[15];      // Primary Key
     char session[50];
 } CLIENTE;

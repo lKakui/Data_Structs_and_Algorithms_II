@@ -2,108 +2,82 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define bool int
+typedef struct produto {
+    float price;
+    char idProd[20];      // Primary Key
+    char brand[30];      // Secondary Key
+    char codeCategory[40];
+} PROD;
 
-struct movie{
-	int id;
-	char nome[64];
-	int age;
-	char link[100];
-	int id_direc;
-};
+typedef struct cliente {
+    char eventType[10];   // Secondary Key
+    char idUser[15];      // Primary Key
+    char session[50];
+} CLIENTE;
 
-struct index{
-    int id;
-    int deslocamento;
-    bool on;
-    bool extra;
-    int prox ;
-};
-
-void txt2bin(FILE *filme, FILE *filmebin){
-    struct movie *novo = (struct movie*)malloc(sizeof(struct movie));
-	
-	char line[200];
-	
-	while((fgets(line, sizeof(line),filme))!= NULL){
-		line[strcspn(line, "\n")] = '\0'; //percorre a linha ate achar o \n, coloca nesta posi??o o \0
-		char* token = strtok(line, ","); //token recebe a string em line at? encontrar o ";";
-		if(token != NULL){
-			novo->id = atoi(token); //converte o string id em int
-			token = strtok(NULL, ","); //o null fala para a fun?ao continuar, buscando valores da string mandado anteriormentem, na qual agora ira enviar o segundo token
-		}
-		if(token != NULL){
-			strncpy(novo->nome, token, sizeof(novo->nome)); //copia a string em token e cola na struct 
-			novo->nome[sizeof(novo->nome) - 1] = '\0'; //coloca o \0 no final para delimitar a string
-			token = strtok(NULL, ","); //recebe o pr?ximo token
-		}
-		if(token != NULL){
-			novo->age = atoi(token); //converte o string age em int
-			token = strtok(NULL, ",");
-		}
-		if(token != NULL){
-			strncpy(novo->link, token, sizeof(novo->link)); //copia a string em token e cola na struct 
-			novo->link[sizeof(novo->link) - 1] = '\0'; //coloca o \0 no final para delimitar a string
-			token = strtok(NULL, ","); //recebe o pr?ximo token
-		}
-		if (token != NULL) {
-            novo->id_direc = atoi(token);
-        }
-        
-        fwrite(novo, sizeof(struct movie),1,filmebin); // fwrite usado quando o arq Ã© binario, (end struct, tamanho do dado, qntd de elementos, arq. destino)
-	}
-	
-	free(novo);
-	
-	fclose(filmebin);
-}
-
-int calcsize(FILE *bin){
-    int aux;
-    fseek(bin, 0, SEEK_END);
-    rewind(bin);
-    return aux;
-}
-
-struct index * orgarq(FILE *bin, int size){
-    int i;
-    struct movie *aux;
-    struct index *root = (struct index *)calloc(0,size*sizeof(struct index));
-    for(i=0; i < size+1; i++){
-        fread(&aux, sizeof(struct movie), 1, bin);
-        root[aux->id].id = aux->id;
-        root[i].deslocamento = i;
+void preencher_string(char *str, int tamanho) {
+    if (strlen(str) == 0) {
+        strncpy(str,"nulo", tamanho - 1);
+        str[tamanho - 1] = '\0'; 
     }
-    return root;
-}
-
-
-void menufilmes(){
-    int size;
-    struct index *root;
-    FILE *txt = fopen("arqMovies.txt", "r");
-    FILE *bin = fopen("arqMovies.bin", "a+");
-    if(bin == NULL){
-        bin = fopen("arqMovies.bin", "wb+");
-        fclose(bin);
-        bin = fopen("arqMovies.bin", "a+");
+    
+    // preencher a string com espaço em branco para deixa tudo de um tamanho especifico
+    int len = strlen(str);
+    for (int i = len; i < tamanho - 1; i++) {
+        str[i] = ' ';
     }
-
-    txt2bin(txt, bin);
-
-    size = calcsize(bin);
-
-    root = orgarq(bin, size);
-
-
-
+    str[tamanho - 1] = '\0'; 
 }
 
+void ler_arquivo(FILE *f) { // f -> arquivo de entrada 
+    FILE *arqProduto = fopen("Arquivo_Produto.bin", "wb");
+    FILE *arqCliente = fopen("Arquivo_Cliente.bin", "wb");
 
+    if (!arqProduto || !arqCliente) {
+        perror("Erro ao abrir arquivos");
+        return;
+    }
+    
+    char linha[200];
+    PROD produto;
+    CLIENTE cliente;
 
+    // Ler cada linha do CSV
+    while (fscanf(f, "%s",linha) == 1 ){
+        char *token = strtok(linha,",");
+        //verificar a ordem dos tokens, para validar certo, não deve estar certo e nem na ordem certa
+        //Copiar os token para as structs  //confirir isso depois
+        strncpy(cliente.idUser , token[0]); //arrumar 
+        strncpy(produto.idProd , token[1]); //arrumar 
+        strncpy(produto.codeCategory , token[2]); //arrumar 
+        strncpy(produto.brand , token[3]); //arrumar 
+        strncpy(cliente.eventType , token[4]); //arrumar 
+        strncpy(cliente.session , token[5]); //arrumar 
 
+        preencher_string(cliente.idUser, sizeof(cliente.idUser));
+        preencher_string(produto.idProd, sizeof(produto.idProd));
+        preencher_string(produto.codeCategory, sizeof(produto.codeCategory));
+        preencher_string(produto.brand, sizeof(produto.brand));
+        preencher_string(cliente.eventType, sizeof(cliente.eventType));
+        preencher_string(cliente.session, sizeof(cliente.session));
 
+        // Escrever no arquivo de produtos
+        fwrite(&produto, sizeof(PROD), 1, arqProduto);
 
-int main(){
-    menufilmes();
+        // Escrever no arquivo de clientes
+        fwrite(&cliente, sizeof(CLIENTE), 1, arqCliente);
+    }
+    fclose(arqProduto);
+    fclose(arqCliente);
 }
+
+int cmpCliente(CLIENTE i, CLIENTE j){
+    return strcmp(i.idUser,j.idUser); // 1 se i é maior, -1 se 2 é maior
+                                        // 0 se é igual
+}
+
+int cmpProd(PROD i,PROD j){
+    return strcmp(i.idProd,j.idProd); // 1 se i é maior, -1 se 2 é maior
+                                        // 0 se é igual
+}
+

@@ -42,6 +42,4 @@ int file_reader(FILE *data){
 
     fclose(userfile);
     fclose(prodfile);
-    prodfile = fopen("../output/prodfile.bin", "wb");
-    fclose(prodfile);
 }

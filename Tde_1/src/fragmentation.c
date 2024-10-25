@@ -3,12 +3,12 @@
 
 #include "reader.h"
 
-#define FRAGMENT_SIZE 10
+#define FRAGMENT_SIZE 3000000
 
 int file_sort_frag(FILE *input, size_t data_size, int (*compare)(const void *, const void*)){
     int count, iter = 0;
     void *buffer = malloc(data_size * FRAGMENT_SIZE);
-    char file_name[35];
+    char file_name[50];
 
     while ((count = fread(buffer, data_size, FRAGMENT_SIZE, input)))
     {

@@ -120,7 +120,7 @@ int fileuser_merge(int n_fragments){
     
     for(int i = 0; i < n_fragments; i++){ //carrega as partições
         FILE *aux_file = all_files[i];
-        if(fread(aux_user,sizeof(ProductEntry),1,aux_file) != 1){//le todo as particoes e coloca no index all_files[0]
+        if(fread(aux_user,sizeof(UserEntry),1,aux_file) != 1){//le todo as particoes e coloca no index all_files[0]
             perror("nao abriu");
             break;
         }

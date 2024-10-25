@@ -25,23 +25,44 @@ int main(){
     clock_t inicio;
     clock_t end;
 
-    inicio = clock();
-    FILE *data = fopen("../input/2019-Nov.csv","r");
-    file_reader (data);
-    end = clock();
-    print_time(inicio, end);
+    int n_fragments;
 
-    inicio = clock();
-    FILE *prod_data = fopen("../output/userfile.bin","rb+");
-    if(prod_data == NULL){
-        perror("erro ao abrir o arquivo.");
-    }
-    int n_fragments = file_sort_frag (prod_data, sizeof(ProductEntry),compare_prod);
-    end = clock();
-    print_time(inicio, end);
+    // inicio = clock();
+    // FILE *data = fopen("../input/2019-Nov.csv","r");
+    // file_reader (data);
+    // end = clock();
+    // print_time(inicio, end);
 
+    
+    // prodfile ---------------------------------------------------------------
+    // inicio = clock();
+    // FILE *prod_data = fopen("../output/prodfile.bin","rb+");
+    // if(prod_data == NULL){
+    //     perror("erro ao abrir o arquivo.");
+    // }
+    // n_fragments = file_sort_frag (prod_data, sizeof(ProductEntry),compare_prod);
+    // end = clock();
+    // print_time(inicio, end);
+
+    // inicio = clock();
+    // fileprod_merge(n_fragments);
+    // fclose(prod_data);
+    // end = clock();
+    // print_time(inicio, end);
+
+    //userfile ---------------------------------------------------------------
     inicio = clock();
-    file_merge(n_fragments);
-    end = clock();
-    print_time(inicio, end);
+     FILE *user_data = fopen("../output/userfile.bin","rb+");
+     if(user_data == NULL){
+         perror("erro ao abrir o arquivo.");
+     }
+     n_fragments = file_sort_frag (user_data, sizeof(UserEntry),compare_user);
+     end = clock();
+     print_time(inicio, end);
+
+     inicio = clock();
+     fileuser_merge(n_fragments);
+     fclose(user_data);
+     end = clock();
+     print_time(inicio, end);
 }

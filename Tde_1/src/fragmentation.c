@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "reader.h"
 
@@ -9,9 +10,13 @@ int file_sort_frag(FILE *input, size_t data_size, int (*compare)(const void *, c
     int count, iter = 0;
     void *buffer = malloc(data_size * FRAGMENT_SIZE);
     char file_name[50];
+    UserEntry *aux;
+
+    int flag = 0;
 
     while ((count = fread(buffer, data_size, FRAGMENT_SIZE, input)))
     {
+        aux = (UserEntry *)buffer;
         iter++;
         qsort(buffer, count, data_size, compare);
         sprintf(file_name, "../output/partitions/fragment_%d.bin", iter);
@@ -19,10 +24,6 @@ int file_sort_frag(FILE *input, size_t data_size, int (*compare)(const void *, c
         fwrite(buffer, data_size, count, output);
         fclose(output);
     }
-
     free(buffer);
     return iter;
 }
-
-
-

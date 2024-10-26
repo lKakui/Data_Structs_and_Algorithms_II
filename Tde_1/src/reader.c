@@ -22,7 +22,7 @@ int file_reader(FILE *data){
     clock_t start = clock();
 
     while (fgets(buffer, sizeof(buffer), data) != NULL){
-        sscanf(buffer, "%[^,],%[^,],%d,%lld,%[^,],%[^,],%f,%d,%[^,]",
+        sscanf(buffer, "%[^,],%[^,],%d,%lld,%[^,],%[^,],%f,%lld,%[^,]",
             user_buffer.event_time,
             user_buffer.event_type,
             &product_buffer.product_id,

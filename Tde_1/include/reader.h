@@ -12,7 +12,7 @@ typedef struct product_entry{
 } ProductEntry;
 
 typedef struct user_entry{
-    unsigned int user_id;
+    long long unsigned user_id;
     char event_time[24];
     char event_type[17];
     char user_session[37];

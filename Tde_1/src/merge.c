@@ -59,6 +59,21 @@ int find_small(int *vet, int vet_size) {
     return posi;
 }
 
+int find_small_unsigned(unsigned int *vet, int vet_size) {
+    unsigned int small = -1;
+    int posi = -1;
+
+    for (int i = 0; i < vet_size; i++) {
+        if (vet[i] != 0) { // Ignora zeros
+            if (small == -1 || vet[i] < small) { // Se é o primeiro não zero ou menor que o atual
+                small = vet[i];
+                posi = i;
+            }
+        }
+    }
+    return posi;
+}
+
 
 int fileprod_merge(int n_fragments){
     FILE **all_files = open_parts(n_fragments);
@@ -114,7 +129,7 @@ int fileprod_merge(int n_fragments){
 
 int fileuser_merge(int n_fragments){
     FILE **all_files = open_parts(n_fragments);
-    int *vet = (int*)malloc(sizeof(int) * n_fragments);
+    unsigned int *vet = (unsigned int*)malloc(sizeof(unsigned int) * n_fragments);
     UserEntry *aux_user = (UserEntry*)malloc(sizeof(UserEntry));
     UserEntry *index = (UserEntry*)malloc(sizeof(UserEntry)*n_fragments);
     
@@ -126,7 +141,7 @@ int fileuser_merge(int n_fragments){
         }
         index[i] = *aux_user;
         vet[i] = index[i].user_id;
-        printf("\nValor: %d", index[i].user_id);
+        printf("\nValor: %u", index[i].user_id);
     }
 
     FILE* final = fopen("../output/fileusersort.bin","wb");
@@ -137,7 +152,7 @@ int fileuser_merge(int n_fragments){
     int position;
 
     while (1) {
-        position = find_small(vet, n_fragments);
+        position = find_small_unsigned(vet, n_fragments);
         if (position < 0) {
             printf("\nsaiu pelo break");
             break;  //Sai do loop se não encontrar mais elementos válidos

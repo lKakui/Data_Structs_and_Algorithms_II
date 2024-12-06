@@ -148,10 +148,6 @@ int read_file(FILE *input, size_t model){
         fseek(input,-4,SEEK_CUR);
     }
 
-    printf("%lld %lld %lld %lld", root->keys[0], root->keys[1], root->keys[2], root->keys[3]);
-    BTREE *aux = root->children[0];
-    printf("\n%lld %lld %lld %lld", aux->keys[0], aux->keys[1], aux->keys[2], aux->keys[3]);
-
     printf("\nIn-order traversal of the B-tree: ");
     traverse(root);
 

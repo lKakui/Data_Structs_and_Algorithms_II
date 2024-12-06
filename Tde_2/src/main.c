@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "../include/reader.h"
+#include "../include/hash.h"
 
 // 1 - montar um índice com uma b++ de chave primária
 
@@ -12,7 +13,11 @@ int main (void){
         perror("Erro ao abrir o arquivo");
     }
 
-   if (read_file(input, sizeof(PRODUCT))){
+//    if (read_file(input, sizeof(PRODUCT))){
+//     printf("deu certo.");
+//    }
+
+   if (create_hash_index(input, sizeof(PRODUCT))){
     printf("deu certo.");
    }
 

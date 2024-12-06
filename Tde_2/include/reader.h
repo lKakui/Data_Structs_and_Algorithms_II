@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <stddef.h> // Para garantir acesso a NULL
 
-#define N 5 // Número máximo de filhos de um nó da B-tree
+#define N 6 // Número máximo de filhos de um nó da B-tree
 
 // Estrutura para representar um nó de uma B-tree
 typedef struct BTreeNode {

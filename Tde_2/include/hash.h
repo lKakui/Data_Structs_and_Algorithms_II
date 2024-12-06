@@ -11,8 +11,8 @@
 
 // Estrutura para representar uma hash
 typedef struct hash {
-    int adress;
-    int value;
+    int address;
+    float value;
     int key; // Chave para ordenação
     struct hash *next; // Ponteiro para lidar com colisões (encadeamento)
 } HASH;

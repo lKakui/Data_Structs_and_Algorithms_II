@@ -119,16 +119,48 @@ void traverse(struct BTreeNode *root) {
         int i;
         for (i = 0; i < root->num_keys; i++) {
             traverse(root->children[i]);
-            printf("\nposicao %d", i);
             printf("\nNode:");
             printf("\nid: %lld ", root->keys[i]);
             printf("\nendereco: %d", root->address[i]);
+            printf("\nIs_leaf: %d", root->is_leaf);
             printf("\n------------------------");
 
         }
         traverse(root->children[i]);
     }
 }
+
+void search_tree(struct BTreeNode *root, int id_product) {
+    if (root == NULL) {
+        printf("Produto não encontrado.\n");
+        return;
+    }
+
+    int i = 0;
+
+    // Procura a chave no nó atual
+    while (i < root->num_keys && id_product > root->keys[i]) {
+        i++;
+    }
+
+    // Se a chave foi encontrada no nó atual
+    if (i < root->num_keys && id_product == root->keys[i]) {
+        printf("Produto encontrado!\n");
+        printf("ID: %d\n", id_product);
+        printf("Endereço: %d\n", root->address[i]);
+        return;
+    }
+
+    // Se o nó é folha, a chave não está na árvore
+    if (root->is_leaf) {
+        printf("Produto não encontrado.\n");
+        return;
+    }
+
+    // Continua a busca no filho apropriado
+    search_tree(root->children[i], id_product);
+}
+
 
 int read_file(FILE *input, size_t model){
     BTREE *root = NULL;
@@ -137,7 +169,7 @@ int read_file(FILE *input, size_t model){
 
     void *buffer = malloc(model);
 
-    while ((fread(buffer, model, 1, input) == 1) && (position < 5)){
+    while ((fread(buffer, model, 1, input) == 1)){
 
         PRODUCT *read = (PRODUCT*)buffer;
 
@@ -148,8 +180,10 @@ int read_file(FILE *input, size_t model){
         fseek(input,-4,SEEK_CUR);
     }
 
-    printf("\nIn-order traversal of the B-tree: ");
-    traverse(root);
+    // printf("\nIn-order traversal of the B-tree: ");
+    // traverse(root);
+
+    search_tree(root,1000365);
 
     return 1;
 }

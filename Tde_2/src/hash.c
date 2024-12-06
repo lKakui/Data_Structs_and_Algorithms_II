@@ -1,33 +1,30 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "../include/hash.h"
 
-// fazer por marca somar caracteres e calcular via hash
-
-// Função para criar um nó da tabela hash
-HASH* create_hash_node(float value, int adress, int sequence) {
-    HASH *new = (HASH *)malloc(sizeof(HASH));
-    if (new == NULL) {
-        perror("Erro de alocação");
-        return NULL; // Retorna NULL em caso de erro
+// Function to create a hash node
+HASH* create_hash_node(float value, int address, int sequence) {
+    HASH *new_node = (HASH *)malloc(sizeof(HASH));
+    if (new_node == NULL) {
+        perror("Memory allocation error");
+        return NULL; // Return NULL in case of an error
     }
 
-    new->adress = adress;
-    new->value = value;
-    new->key = sequence;
-    new->next = NULL;
+    new_node->address = address;
+    new_node->value = value;
+    new_node->key = sequence;
+    new_node->next = NULL;
 
-    return new;
+    return new_node;
 }
 
-
-// Função para inserir um produto na tabela hash
+// Function to insert a product into the hash table
 int insert_hash(HASH **index, PRODUCT *read, int position) {
-
     int line = (int)(read->value * 100); // Multiplica por 100 para maior granularidade
 
-    // Calcula a posição na tabela hash e a sequência
+    // Calcula a posição no hash e a sequência
     int hash_position = line % B; // Índice na tabela hash
     int sequence = line / B;      // Sequência para a chave
 
@@ -37,48 +34,123 @@ int insert_hash(HASH **index, PRODUCT *read, int position) {
         return -1; // Retorna erro se a alocação falhar
     }
 
-    // Insere o nó na tabela hash usando encadeamento
+    // Caso não haja colisões, insere diretamente
     if (index[hash_position] == NULL) {
-        index[hash_position] = new_node; // Caso não exista colisão
+        index[hash_position] = new_node; // Sem colisão
     } else {
-        // Insere no início da lista encadeada para lidar com colisões
-        new_node->next = index[hash_position];
-        index[hash_position] = new_node;
+        // Insere de maneira ordenada
+        HASH *current = index[hash_position];
+        HASH *previous = NULL;
+
+        // Percorre a lista até encontrar a posição correta
+        while (current != NULL && current->key < sequence) {
+            previous = current;
+            current = current->next;
+        }
+
+        // Insere no início da lista se a sequência for menor que o primeiro elemento
+        if (previous == NULL) {
+            new_node->next = index[hash_position];
+            index[hash_position] = new_node;
+        } else {
+            // Insere no meio ou no final da lista
+            previous->next = new_node;
+            new_node->next = current;
+        }
     }
 
     return 0; // Sucesso
 }
 
-HASH ** inicialize_index(){
-    HASH **aux = (HASH **)malloc(B * sizeof(HASH*));
 
+// Function to initialize the hash table
+HASH **initialize_index() {
+    HASH **aux = (HASH **)malloc(B * sizeof(HASH*));
     if (aux == NULL) {
-        perror("Erro ao alocar memória para a tabela hash");
+        perror("Memory allocation error for hash table");
+        return NULL;
     }
 
-    for(int i = 0; i < B; i++){
+    for (int i = 0; i < B; i++) {
         aux[i] = NULL;
     }
 
     return aux;
 }
 
+// Function to search in the hash table (implementing a basic search)
+HASH* hash_search(HASH **index, float value) {
+    int line = (int)(value * 100); 
+    int hash_position = line % B;
 
-int create_hash_index(FILE *input, size_t model){    
-    HASH **index = inicialize_index();
+    HASH *current = index[hash_position];
+    while (current != NULL) {
+        if (current->value == value) {
+            return current; // Found
+        }
+        current = current->next;
+    }
+    return NULL; // Not found
+}
+
+// Function to print a hash table chain
+void print_line(HASH *index, int flag) {
+    while (index != NULL) {
+        printf("Value: %.2f\n", index->value);
+        printf("Address: %d\n", index->address);
+        printf("Key: %d\n", index->key);
+        printf("------------------------\n");
+        if(flag){
+            break;
+        }
+        index = index->next;
+    }
+}
+
+// Function to create a hash table index from a file
+int create_hash_index(FILE *input, size_t model) {
+    HASH **index = initialize_index();
+    if (index == NULL) {
+        return -1; // Memory allocation error
+    }
+
     int position = 0;
     void *buffer = malloc(model);
+    if (buffer == NULL) {
+        perror("Memory allocation error for buffer");
+        free(index);
+        return -1;
+    }
 
-    while ((fread(buffer, model, 1, input) == 1) && (position < 5)){
+    while ((fread(buffer, model, 1, input) == 1)) {
+        PRODUCT *read = (PRODUCT *)buffer;
 
-        PRODUCT *read = (PRODUCT*)buffer;
-
-        insert_hash(index , read, position);
+        if (insert_hash(index, read, position) != 0) {
+            perror("Error inserting into hash table");
+            free(buffer);
+            free(index);
+            return -1;
+        }
 
         position++;
-
         fseek(input,-4,SEEK_CUR);
     }
 
-    return 1;
+    HASH* aux = hash_search(index, 1845.75);
+
+    print_line(aux, 1);
+
+    // Cleanup
+    free(buffer);
+    for (int i = 0; i < B; i++) {
+        HASH *current = index[i];
+        while (current != NULL) {
+            HASH *temp = current;
+            current = current->next;
+            free(temp);
+        }
+    }
+    free(index);
+
+    return 0;
 }
